@@ -7,19 +7,19 @@ on:
 
 jobs:
   build_stencil_playwright:
-    name: Build
+    name: 🏗️ Build
     uses: ./.github/workflows/build.yml
 
   get_dev_version:
-    name: Get Dev Build Version
+    name: 🏷️ Get Dev Build Version
     runs-on: ubuntu-latest
     outputs:
       dev-version: ${{ steps.generate-dev-version.outputs.DEV_VERSION }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: 📥 Checkout Code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Generate Dev Version
+      - name: 🏷️ Generate Dev Version
         id: generate-dev-version
         run: |
           PKG_JSON_VERSION=$(cat package.json | jq -r '.version')
@@ -37,16 +37,17 @@ jobs:
         shell: bash
 
   release_stencil_playwright:
-    name: Publish Dev Build
+    name: 📦 Publish Dev Build
     needs: [build_stencil_playwright, get_dev_version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: ./.github/workflows/actions/publish-npm
+      - name: 📥 Checkout Code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: 📦 Publish Dev Build
+        uses: ./.github/workflows/actions/publish-npm
         with:
           tag: dev
           version: ${{ needs.get_dev_version.outputs.dev-version }}
