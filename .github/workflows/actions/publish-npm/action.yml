@@ -5,8 +5,14 @@ inputs:
     description: 'The type of version to release.'
   tag:
     description: 'The tag to publish to on NPM.'
-  token:
-    description: 'The NPM authentication token required to publish.'
+  node-version:
+    description: 'Node.js version to use when publishing.'
+    required: false
+    default: '20'
+  registry-url:
+    description: 'Registry URL used for npm publish.'
+    required: false
+    default: 'https://registry.npmjs.org'
 runs:
   using: 'composite'
   steps:
@@ -22,6 +28,12 @@ runs:
 
     - name: 🕸️ Get Core Dependencies
       uses: ./.github/workflows/actions/get-core-dependencies
+
+    - name: 🟢 Configure Node for Publish
+      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: ${{ inputs.registry-url }}
 
     - name: 📤 Download Build Archive
       uses: ./.github/workflows/actions/download-archive
@@ -53,11 +65,9 @@ runs:
       run: git status
       shell: bash
 
-    - name: 🔑 Prepare NPM Token
-      run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
+    - name: 🔄 Ensure Latest npm
+      run: npm install -g npm@latest
       shell: bash
-      env:
-        NPM_TOKEN: ${{ inputs.token }}
 
     - name: 📦 Publish to NPM
       run: npm publish --tag ${{ inputs.tag }} --provenance

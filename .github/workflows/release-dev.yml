@@ -51,4 +51,3 @@ jobs:
         with:
           tag: dev
           version: ${{ needs.get_dev_version.outputs.dev-version }}
-          token: ${{ secrets.NPM_TOKEN }}

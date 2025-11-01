@@ -52,4 +52,3 @@ jobs:
         with:
           tag: ${{ inputs.tag }}
           version: ${{ steps.version_retrieval.outputs.VERSION_STR }}
-          token: ${{ secrets.NPM_TOKEN }}
