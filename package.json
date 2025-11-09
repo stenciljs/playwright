@@ -51,6 +51,7 @@
     "@ionic/prettier-config": "^4.0.0",
     "@playwright/test": "^1.41.2",
     "@stencil/core": "^4.38.2",
+    "@eslint/js": "^9.38.0",
     "@types/eslint": "^9.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.2",
@@ -69,7 +70,8 @@
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.2"
+    "typescript-eslint": "^8.46.2",
+    "globals": "^14.0.0"
   },
   "prettier": "@ionic/prettier-config",
   "dependencies": {
