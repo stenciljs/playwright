@@ -48,10 +48,10 @@
     "@stencil/core": ">=4.13.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.38.0",
     "@ionic/prettier-config": "^4.0.0",
     "@playwright/test": "^1.41.2",
     "@stencil/core": "^4.38.2",
-    "@eslint/js": "^9.38.0",
     "@types/eslint": "^9.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.2",
