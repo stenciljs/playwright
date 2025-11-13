@@ -15,6 +15,6 @@ runs:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}
 
-    - name: Extract Archive
+    - name: 🔃 Extract Archive
       run: unzip -q -o ${{ inputs.path }}/${{ inputs.filename }} -d ${{ inputs.path }}
       shell: bash

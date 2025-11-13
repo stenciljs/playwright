@@ -14,11 +14,11 @@ on:
 
 jobs:
   build_stencil_playwright:
-    name: Build
+    name: 🏗️ Build
     uses: ./.github/workflows/build.yml
 
   release_stencil_playwright_production_build:
-    name: Publish Stencil Playwright (Production)
+    name: 🚀 Publish Stencil Playwright (Production)
     needs: [ build_stencil_playwright ]
     runs-on: ubuntu-latest
     permissions:
@@ -26,24 +26,24 @@ jobs:
       id-token: write
     steps:
       # Log the input from GitHub Actions for easy traceability
-      - name: Log GitHub Workflow UI Input
+      - name: 📝 Log GitHub Workflow UI Input
         run: |
           echo "Tag: ${{ inputs.tag }}"
         shell: bash
 
-      - name: Checkout Code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: 📥 Checkout Code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: 'main'
 
-      - name: Get the Version String
+      - name: 🏷️ Get the Version String
         id: version_retrieval
         run: |
           VERSION_STR=$(jq '.version' package.json | sed s/\"//g)
           echo "VERSION_STR=$VERSION_STR" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: Print Version String
+      - name: 🖨️ Print Version String
         run: |
           echo Version: ${{ steps.version_retrieval.outputs.VERSION_STR }}
         shell: bash
@@ -52,4 +52,3 @@ jobs:
         with:
           tag: ${{ inputs.tag }}
           version: ${{ steps.version_retrieval.outputs.VERSION_STR }}
-          token: ${{ secrets.NPM_TOKEN }}

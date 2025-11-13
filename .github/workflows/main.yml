@@ -15,15 +15,15 @@ concurrency:
 
 jobs:
   build_playwright:
-    name: Build
+    name: 🏗️ Build
     uses: ./.github/workflows/build.yml
 
   lint_and_format:
-    name: Lint and Format
+    name: 📝 Lint and Format
     uses: ./.github/workflows/lint-and-format.yml
 
   unit_tests:
-    name: Unit Tests
+    name: 🧪 Unit Tests
     needs: [build_playwright]
     uses: ./.github/workflows/test-unit.yml
     with:

@@ -22,25 +22,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Log the input from GitHub Actions for easy traceability
-      - name: Log GitHub Input
+      - name: 📝 Log GitHub Input
         run: |
           echo "Version: ${{ inputs.version }}"
         shell: bash
 
-      - name: Checkout Code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: 📥 Checkout Code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Get Core Dependencies
+      - name: 🕸️ Get Core Dependencies
         uses: ./.github/workflows/actions/get-core-dependencies
 
-      - name: Bump the Version
+      - name: 🏷️ Bump the Version
         run: npm version ${{ inputs.version }} --no-git-tag
 
-      - name: Log Generated Changes
+      - name: 📝 Log Generated Changes
         run: git --no-pager diff
         shell: bash
 
-      - name: Generate Version String and Branch Name
+      - name: 🏷️ Generate Version String and Branch Name
         id: name_gen
         run: |
           VERSION_STR=$(jq '.version' package.json | sed s/\"//g)
@@ -48,13 +48,13 @@ jobs:
           echo "BRANCH_NAME=release/$VERSION_STR-run-${{ github.run_number }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: Print Version String and Branch Name
+      - name: 🖨️ Print Version String and Branch Name
         run: |
           echo Version: ${{ steps.name_gen.outputs.VERSION_STR }}
           echo Branch Name: ${{ steps.name_gen.outputs.BRANCH_NAME }}
         shell: bash
 
-      - name: Create the Pull Request
+      - name: 📝 Create the Pull Request
         uses: peter-evans/create-pull-request@a4f52f8033a6168103c2538976c07b467e8163bc # v6.0.1
         with:
           # specifies the name of the branch to create off of the base branch

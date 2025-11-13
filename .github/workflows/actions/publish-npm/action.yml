@@ -5,25 +5,37 @@ inputs:
     description: 'The type of version to release.'
   tag:
     description: 'The tag to publish to on NPM.'
-  token:
-    description: 'The NPM authentication token required to publish.'
+  node-version:
+    description: 'Node.js version to use when publishing.'
+    required: false
+    default: '20'
+  registry-url:
+    description: 'Registry URL used for npm publish.'
+    required: false
+    default: 'https://registry.npmjs.org'
 runs:
   using: 'composite'
   steps:
     # Log the input from GitHub Actions for easy traceability
-    - name: Log Inputs
+    - name: 📝 Log Inputs
       run: |
         echo "Version: ${{ inputs.version }}"
         echo "Tag: ${{ inputs.tag }}"
       shell: bash
 
-    - name: Checkout Code
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: 📥 Checkout Code
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-    - name: Get Core Dependencies
+    - name: 🕸️ Get Core Dependencies
       uses: ./.github/workflows/actions/get-core-dependencies
 
-    - name: Download Build Archive
+    - name: 🟢 Configure Node for Publish
+      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: ${{ inputs.registry-url }}
+
+    - name: 📤 Download Build Archive
       uses: ./.github/workflows/actions/download-archive
       with:
         name: stencil-playwright
@@ -31,11 +43,11 @@ runs:
         filename: stencil-playwright-build.zip
 
     # Remove the ZIP file after we've extracted it - we don't want this committed back to the repo
-    - name: Delete The Archive ZIP File
+    - name: 🗑️ Delete The Archive ZIP File
       run: rm stencil-playwright-build.zip
       shell: bash
 
-    - name: Bump Version
+    - name: 🏷️ Bump Version
       # --allow-same-version is useful for cases when performing a production release, where we expect the version to
       # have been bumped by running the Production PR Creation workflow first.
       #
@@ -44,21 +56,19 @@ runs:
       shell: bash
 
     # Log the git diff for easy debugging
-    - name: Log Generated Changes
+    - name: 📝 Log Generated Changes
       run: git --no-pager diff
       shell: bash
 
     # Log the git status for easy debugging
-    - name: Log Status
+    - name: 📝 Log Status
       run: git status
       shell: bash
 
-    - name: Prepare NPM Token
-      run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
+    - name: 🔄 Ensure Latest npm
+      run: npm install -g npm@latest
       shell: bash
-      env:
-        NPM_TOKEN: ${{ inputs.token }}
 
-    - name: Publish to NPM
+    - name: 🚀 Publish to NPM
       run: npm publish --tag ${{ inputs.tag }} --provenance
       shell: bash
