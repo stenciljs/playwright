@@ -48,7 +48,7 @@ jobs:
           echo Version: ${{ steps.version_retrieval.outputs.VERSION_STR }}
         shell: bash
 
-      - uses: ./.github/workflows/actions/publish-npm
+      - uses: ./.github/workflows/publish-npm.yml
         with:
           tag: ${{ inputs.tag }}
           version: ${{ steps.version_retrieval.outputs.VERSION_STR }}
