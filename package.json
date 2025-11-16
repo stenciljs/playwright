@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ionic-team/stencil-playwright.git"
+    "url": "https://github.com/stenciljs/playwright"
   },
   "keywords": [
     "stencil",
@@ -32,9 +32,9 @@
   "author": "Stencil Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ionic-team/stencil-playwright/issues"
+    "url": "https://github.com/stenciljs/playwright/issues"
   },
-  "homepage": "https://github.com/ionic-team/stencil-playwright#readme",
+  "homepage": "https://github.com/stenciljs/playwright#readme",
   "engines": {
     "node": ">=12.0.0",
     "npm": ">=6.0.0"
