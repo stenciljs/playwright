@@ -1,16 +1,17 @@
 name: 'Stencil Playwright Production Release'
+
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       tag:
         required: false
         default: latest
-        type: choice
-        description: Which npm tag should this be published to?
-        options:
-          - latest
-          - dev
+        type: string
+        description: Which npm tag should this be published to? (latest or dev)
 
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   build_stencil_playwright:
@@ -19,10 +20,10 @@ jobs:
 
   release_stencil_playwright_production_build:
     name: 🚀 Publish Stencil Playwright (Production)
-    needs: [ build_stencil_playwright ]
+    needs: [build_stencil_playwright]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
       # Log the input from GitHub Actions for easy traceability

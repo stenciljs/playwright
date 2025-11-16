@@ -1,74 +1,94 @@
 name: 'Publish to NPM'
-description: 'Publish the package to the NPM registry'
-inputs:
-  version:
-    description: 'The type of version to release.'
-  tag:
-    description: 'The tag to publish to on NPM.'
-  node-version:
-    description: 'Node.js version to use when publishing.'
-    required: false
-    default: '20'
-  registry-url:
-    description: 'Registry URL used for npm publish.'
-    required: false
-    default: 'https://registry.npmjs.org'
-runs:
-  using: 'composite'
-  steps:
-    # Log the input from GitHub Actions for easy traceability
-    - name: 📝 Log Inputs
-      run: |
-        echo "Version: ${{ inputs.version }}"
-        echo "Tag: ${{ inputs.tag }}"
-      shell: bash
 
-    - name: 📥 Checkout Code
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'The type of version to release.'
+        required: true
+        type: string
+      tag:
+        description: 'The tag to publish to on NPM.'
+        required: true
+        type: string
+      node-version:
+        description: 'Node.js version to use when publishing.'
+        required: false
+        type: string
+        default: '20'
+      registry-url:
+        description: 'Registry URL used for npm publish.'
+        required: false
+        type: string
+        default: 'https://registry.npmjs.org'
+      scope:
+        description: 'npm scope that should use the trusted publisher auth.'
+        required: false
+        type: string
+        default: '@stencil'
 
-    - name: 🕸️ Get Core Dependencies
-      uses: ./.github/workflows/actions/get-core-dependencies
+permissions:
+  contents: read
+  id-token: write
 
-    - name: 🟢 Configure Node for Publish
-      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
-      with:
-        node-version: ${{ inputs.node-version }}
-        registry-url: ${{ inputs.registry-url }}
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # Log the input from GitHub Actions for easy traceability
+      - name: 📝 Log Inputs
+        run: |
+          echo "Version: ${{ inputs.version }}"
+          echo "Tag: ${{ inputs.tag }}"
+        shell: bash
 
-    - name: 📤 Download Build Archive
-      uses: ./.github/workflows/actions/download-archive
-      with:
-        name: stencil-playwright
-        path: .
-        filename: stencil-playwright-build.zip
+      - name: 📥 Checkout Code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-    # Remove the ZIP file after we've extracted it - we don't want this committed back to the repo
-    - name: 🗑️ Delete The Archive ZIP File
-      run: rm stencil-playwright-build.zip
-      shell: bash
+      - name: 🕸️ Get Core Dependencies
+        uses: ./.github/workflows/actions/get-core-dependencies
 
-    - name: 🏷️ Bump Version
-      # --allow-same-version is useful for cases when performing a production release, where we expect the version to
-      # have been bumped by running the Production PR Creation workflow first.
-      #
-      # TODO(STENCIL-1221): Push git tags to GitHub, only on Prod releases
-      run: npm version --no-git-tag-version ${{ inputs.version }} --allow-same-version
-      shell: bash
+      - name: 🟢 Configure Node for Publish
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: ${{ inputs.registry-url }}
+          scope: ${{ inputs.scope }}
 
-    # Log the git diff for easy debugging
-    - name: 📝 Log Generated Changes
-      run: git --no-pager diff
-      shell: bash
+      - name: 📤 Download Build Archive
+        uses: ./.github/workflows/actions/download-archive
+        with:
+          name: stencil-playwright
+          path: .
+          filename: stencil-playwright-build.zip
 
-    # Log the git status for easy debugging
-    - name: 📝 Log Status
-      run: git status
-      shell: bash
+      # Remove the ZIP file after we've extracted it - we don't want this committed back to the repo
+      - name: 🗑️ Delete The Archive ZIP File
+        run: rm stencil-playwright-build.zip
+        shell: bash
 
-    - name: 🔄 Ensure Latest npm
-      run: npm install -g npm@latest
-      shell: bash
+      - name: 🏷️ Bump Version
+        # --allow-same-version is useful for cases when performing a production release, where we expect the version to
+        # have been bumped by running the Production PR Creation workflow first.
+        #
+        # TODO(STENCIL-1221): Push git tags to GitHub, only on Prod releases
+        run: npm version --no-git-tag-version ${{ inputs.version }} --allow-same-version
+        shell: bash
 
-    - name: 🚀 Publish to NPM
-      run: npm publish --tag ${{ inputs.tag }} --provenance
-      shell: bash
+      # Log the git diff for easy debugging
+      - name: 📝 Log Generated Changes
+        run: git --no-pager diff
+        shell: bash
+
+      # Log the git status for easy debugging
+      - name: 📝 Log Status
+        run: git status
+        shell: bash
+
+      - name: 🔄 Ensure Latest npm
+        run: npm install -g npm@latest
+        shell: bash
+
+      - name: 🚀 Publish to NPM
+        run: npm publish --tag ${{ inputs.tag }} --provenance
+        shell: bash
