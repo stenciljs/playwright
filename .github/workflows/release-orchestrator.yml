@@ -1,0 +1,38 @@
+name: 'Stencil Playwright Release'
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: 'Which Stencil Playwright release workflow should run?'
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - production
+      tag:
+        description: 'npm tag for production releases.'
+        required: false
+        type: choice
+        default: latest
+        options:
+          - latest
+          - dev
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  run-dev:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.release-type == 'dev' }}
+    uses: ./.github/workflows/release-dev.yml
+    secrets: inherit
+
+  run-production:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.release-type == 'production' }}
+    uses: ./.github/workflows/release-production.yml
+    secrets: inherit
+    with:
+      tag: ${{ inputs.tag }}

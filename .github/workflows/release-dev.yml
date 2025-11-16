@@ -1,9 +1,11 @@
 name: 'Dev Release'
 
 on:
-  workflow_dispatch:
-  # Make this a reusable workflow, no value needed
-  # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+  workflow_call:
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   build_stencil_playwright:
@@ -28,7 +30,7 @@ jobs:
           # A unique string to publish Stencil Playwright under
           # e.g. "2.1.0-dev.1677185104.7c87e34"
           DEV_VERSION=$PKG_JSON_VERSION-dev.$(date +"%s").$GIT_HASH
-          
+
           echo "Using version $DEV_VERSION"
 
           # store a key/value pair in GITHUB_OUTPUT
@@ -39,15 +41,7 @@ jobs:
   release_stencil_playwright:
     name: 📦 Publish Dev Build
     needs: [build_stencil_playwright, get_dev_version]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - name: 📦 Publish Dev Build
-        uses: ./.github/workflows/actions/publish-npm
-        with:
-          tag: dev
-          version: ${{ needs.get_dev_version.outputs.dev-version }}
+    uses: ./.github/workflows/publish-npm.yml
+    with:
+      tag: dev
+      version: ${{ needs.get_dev_version.outputs.dev-version }}
