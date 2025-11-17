@@ -26,12 +26,12 @@ permissions:
 
 jobs:
   run-dev:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.release-type == 'dev' }}
+    if: ${{ inputs.release-type == 'dev' }}
     uses: ./.github/workflows/release-dev.yml
     secrets: inherit
 
   run-production:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.release-type == 'production' }}
+    if: ${{ inputs.release-type == 'production' }}
     uses: ./.github/workflows/release-production.yml
     secrets: inherit
     with:
