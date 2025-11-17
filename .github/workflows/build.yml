@@ -31,3 +31,4 @@ jobs:
           name: stencil-playwright
           output: stencil-playwright-build.zip
           paths: dist/
+
