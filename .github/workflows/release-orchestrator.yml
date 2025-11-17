@@ -1,4 +1,4 @@
-name: 'Stencil Playwright Release'
+name: 'Release - Stencil Playwright'
 
 on:
   workflow_dispatch:
