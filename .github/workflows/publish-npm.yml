@@ -28,7 +28,7 @@ on:
         default: '@stencil'
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -44,6 +44,8 @@ jobs:
 
       - name: 📥 Checkout Code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
 
       - name: 🕸️ Get Core Dependencies
         uses: ./.github/workflows/actions/get-core-dependencies
@@ -75,6 +77,17 @@ jobs:
         run: npm version --no-git-tag-version ${{ inputs.version }} --allow-same-version
         shell: bash
 
+        run: |
+          # Use path.resolve to safely construct the absolute path
+          VERSION=$(node -e "const path = require('path'); const pkgPath = path.resolve('package.json'); const pkg = require(pkgPath); console.log(pkg.version);")
+          if [ -z "$VERSION" ]; then
+            echo "❌ Failed to extract version from package.json. Ensure the file exists and contains a valid 'version' field." >&2
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION from package.json"
+        shell: bash
+
       # Log the git diff for easy debugging
       - name: 📝 Log Generated Changes
         run: git --no-pager diff
@@ -83,6 +96,56 @@ jobs:
       # Log the git status for easy debugging
       - name: 📝 Log Status
         run: git status
+        shell: bash
+
+      - name: 📝 Commit Version Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: bump version to ${{ steps.get-version.outputs.VERSION }}"
+          else
+            echo "No changes to commit"
+          fi
+        shell: bash
+
+      - name: 🏷️ Create Git Tag
+        # Skip tag creation for dev builds to avoid cluttering the repository
+        if: ${{ inputs.tag != 'dev' }}
+        run: |
+          TAG_NAME="v${{ steps.get-version.outputs.VERSION }}"
+          echo "Checking for existing tag: $TAG_NAME"
+          
+          # Check if tag exists locally
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Tag $TAG_NAME already exists locally, skipping creation"
+            exit 0
+          fi
+          
+          # Check if tag exists remotely
+          if git ls-remote --tags origin "$TAG_NAME" | grep -q "$TAG_NAME"; then
+            echo "Tag $TAG_NAME already exists on remote, skipping creation"
+            exit 0
+          fi
+          
+          # Create the tag
+          echo "Creating annotated tag $TAG_NAME"
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          echo "✓ Tag $TAG_NAME created successfully"
+        shell: bash
+
+      - name: 📤 Push Changes and Tag
+        run: |
+          # Push the commit to the current branch
+          git push origin HEAD
+          # Push the tag (only for non-dev builds)
+          if [ "${{ inputs.tag }}" != "dev" ]; then
+            git push origin "v${{ steps.get-version.outputs.VERSION }}"
+          else
+            echo "Skipping tag push for dev build"
+          fi
         shell: bash
 
       - name: 🔄 Ensure Latest npm
