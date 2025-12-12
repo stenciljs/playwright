@@ -77,6 +77,8 @@ jobs:
         run: npm version --no-git-tag-version ${{ inputs.version }} --allow-same-version
         shell: bash
 
+      - name: 🔎 Get Version from package.json
+        id: get-version
         run: |
           # Use path.resolve to safely construct the absolute path
           VERSION=$(node -e "const path = require('path'); const pkgPath = path.resolve('package.json'); const pkg = require(pkgPath); console.log(pkg.version);")
