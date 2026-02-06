@@ -10,7 +10,7 @@ on:
         description: Which npm tag should this be published to? (latest or dev)
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
     needs: [build_stencil_playwright]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       # Log the input from GitHub Actions for easy traceability
