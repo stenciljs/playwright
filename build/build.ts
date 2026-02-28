@@ -7,7 +7,7 @@ async function build() {
     external: ['@playwright/test', '@stencil/core'],
     platform: 'node',
     sourcemap: 'linked',
-    target: 'node16',
+    target: 'node22',
   };
 
   await Promise.all([
@@ -15,12 +15,7 @@ async function build() {
       ...baseOptions,
       outfile: 'dist/index.js',
       format: 'esm',
-    }),
-    esbuild.build({
-      ...baseOptions,
-      outfile: 'dist/index.cjs',
-      format: 'cjs',
-    }),
+    })
   ]);
 }
 

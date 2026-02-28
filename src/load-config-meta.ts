@@ -1,5 +1,4 @@
-import { loadConfig } from '@stencil/core/compiler';
-import { OutputTargetWww } from '@stencil/core/internal';
+import { loadConfig, OutputTargetWww } from '@stencil/core/compiler';
 import { findUp } from 'find-up';
 import { existsSync } from 'fs';
 import { relative } from 'path';

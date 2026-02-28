@@ -1,10 +1,16 @@
 {
   "name": "@stencil/playwright",
-  "version": "0.2.3",
+  "version": "1.2.3-next.0",
   "description": "Testing adapter to use Playwright with Stencil",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "type": "module",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -12,7 +18,7 @@
     "build": "npm run build.empty && npm run build.types && npm run build.bundle",
     "build.empty": "rimraf ./dist ./build/build.js",
     "build.types": "tsc --emitDeclarationOnly --outDir ./dist",
-    "build.bundle": "tsc ./build/build.ts && node ./build/build.js",
+    "build.bundle": "tsx ./build/build.ts",
     "format": "npm run format.base -- --write",
     "format.base": "prettier --cache \"src/**/*.ts\"",
     "format.dry-run": "npm run format.base -- --list-different",
@@ -44,14 +50,14 @@
     "npm": "10.4.0"
   },
   "peerDependencies": {
-    "@playwright/test": ">=1.41.2",
-    "@stencil/core": ">=4.13.0"
+    "@playwright/test": ">=1.50.0",
+    "@stencil/core": ">=5.0.0-next.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "@ionic/prettier-config": "^4.0.0",
-    "@playwright/test": "^1.41.2",
-    "@stencil/core": "^4.38.2",
+    "@playwright/test": "^1.50.0",
+    "@stencil/core": "5.0.0-next.0",
     "@types/eslint": "^9.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.2",
@@ -64,18 +70,24 @@
     "eslint-plugin-jsdoc": "^61.1.11",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.3.0",
+    "globals": "^14.0.0",
     "jest": "^30.2.0",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.2",
-    "globals": "^14.0.0"
+    "typescript-eslint": "^8.46.2"
   },
   "prettier": "@ionic/prettier-config",
   "dependencies": {
     "deepmerge": "^4.3.1",
     "find-up": "^8.0.0"
+  },
+  "overrides": {
+    "@stencil/cli": {
+      "@stencil/core": "5.0.0-next.0"
+    }
   }
 }
