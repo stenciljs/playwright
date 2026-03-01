@@ -15,9 +15,10 @@ const DEFAULT_STENCIL_ENTRY_PATH = `${DEFAULT_STENCIL_ENTRY_PATH_PREFIX}/${DEFAU
  *
  * Loads and validates the project's Stencil config.
  *
+ * @param cwd - Optional directory to start searching from. Defaults to process.cwd().
  * @returns The processed Stencil config metadata.
  */
-export const loadConfigMeta = async () => {
+export const loadConfigMeta = async (cwd?: string) => {
   let baseURL = DEFAULT_BASE_URL;
   let webServerUrl = DEFAULT_WEB_SERVER_URL;
   let stencilNamespace = DEFAULT_NAMESPACE;
@@ -25,7 +26,7 @@ export const loadConfigMeta = async () => {
 
   // Find the Stencil config file in either the current directory, or the nearest ancestor directory.
   // This allows for the Playwright config to exist in a different directory than the Stencil config.
-  const stencilConfigPath = await findUp(['stencil.config.ts', 'stencil.config.js']);
+  const stencilConfigPath = await findUp(['stencil.config.ts', 'stencil.config.js'], { cwd });
 
   // Only load the Stencil config if the user has created one
   if (stencilConfigPath && existsSync(stencilConfigPath)) {

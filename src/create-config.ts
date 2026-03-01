@@ -11,6 +11,15 @@ type DeepPartial<T> = T extends object
     }
   : T;
 
+interface CreateConfigOptions {
+  /**
+   * Directory to start searching for the Stencil config file.
+   * Useful when the working directory differs from the test directory (e.g., VSCode Playwright extension).
+   * Defaults to process.cwd().
+   */
+  cwd?: string;
+}
+
 /**
  * Helper function to easily create a Playwright config for Stencil projects. This function will
  * automatically load the Stencil config meta to set default values for the Playwright config respecting the
@@ -18,12 +27,14 @@ type DeepPartial<T> = T extends object
  * in the Playwright tests.
  *
  * @param overrides Values to override in the default config. Any Playwright config option can be overridden.
+ * @param options Additional options for config creation.
  * @returns A {@link PlaywrightTestConfig} object
  */
 export const createConfig = async (
   overrides: DeepPartial<PlaywrightTestConfig> = {},
+  options: CreateConfigOptions = {},
 ): Promise<PlaywrightTestConfig> => {
-  const { webServerUrl, baseURL, stencilEntryPath, stencilNamespace } = await loadConfigMeta();
+  const { webServerUrl, baseURL, stencilEntryPath, stencilNamespace } = await loadConfigMeta(options.cwd);
 
   // Set the Stencil namespace and entry path as environment variables so we can use them when constructing
   // the HTML `head` content in the `setContent` function. This is just an easy way for us to maintain some context
@@ -46,6 +57,8 @@ export const createConfig = async (
         // Pipe the dev server output to the console
         // Gives visibility to the developer if the dev server fails to start
         stdout: 'pipe',
+        // Run in the specified directory (needed for VSCode Playwright extension)
+        cwd: options.cwd,
       },
     },
     overrides,
