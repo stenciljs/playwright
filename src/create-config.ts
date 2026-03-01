@@ -49,7 +49,7 @@ export const createConfig = async (
         baseURL,
       },
       webServer: {
-        command: 'npx stencil build --dev --watch --serve --no-open --testing',
+        command: 'NODE_ENV=test npx stencil build --dev --watch --serve --no-open --testing',
         url: webServerUrl,
         reuseExistingServer: !!!process.env.CI,
         // Max time to wait for dev server to start before aborting, defaults to 60000 (60 seconds)
@@ -59,6 +59,10 @@ export const createConfig = async (
         stdout: 'pipe',
         // Run in the specified directory (needed for VSCode Playwright extension)
         cwd: options.cwd,
+        env: {
+          // Ensure we set the NODE_ENV to "test" when running the dev server, as some Stencil configs may rely on this environment variable to set different configuration values for testing
+          NODE_ENV: 'test',
+        },
       },
     },
     overrides,
