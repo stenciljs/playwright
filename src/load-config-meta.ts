@@ -1,3 +1,4 @@
+// @ts-ignore - position of type import changed in Stencil 5
 import { loadConfig, OutputTargetWww } from '@stencil/core/compiler';
 import { findUp } from 'find-up';
 import { existsSync } from 'fs';

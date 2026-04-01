@@ -1,6 +1,6 @@
 {
   "name": "@stencil/playwright",
-  "version": "1.2.3-next.11",
+  "version": "0.2.3",
   "description": "Testing adapter to use Playwright with Stencil",
   "type": "module",
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
     "format.dry-run": "npm run format.base -- --list-different",
     "lint": "eslint \"src/**/*.ts\"",
     "spellcheck": "cspell --no-progress \"src/**/*.ts\" \"build/**/*.ts\" \"*.md\"",
-    "test": "jest"
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -51,15 +51,14 @@
   },
   "peerDependencies": {
     "@playwright/test": ">=1.50.0",
-    "@stencil/core": "^4.0.0 || ^5.0.0-0"
+    "@stencil/core": "^4.0.0 || >=5.0.0-alpha.0 <5.0.0-beta.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "@ionic/prettier-config": "^4.0.0",
     "@playwright/test": "^1.50.0",
-    "@stencil/core": "^4.0.0 || ^5.0.0-0",
+    "@stencil/core": ">=5.0.0-alpha.0 <5.0.0-beta.0",
     "@types/eslint": "^9.6.1",
-    "@types/jest": "^30.0.0",
     "@types/node": "^24.9.2",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
@@ -71,10 +70,9 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.3.0",
     "globals": "^14.0.0",
-    "jest": "^30.2.0",
+    "vitest": "^3.2.4",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
-    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",

@@ -49,7 +49,7 @@ export const createConfig = async (
         baseURL,
       },
       webServer: {
-        command: 'npx stencil build --dev --watch --serve --no-open --testing',
+        command: 'stencil build --dev --watch --serve --no-open --testing',
         url: webServerUrl,
         reuseExistingServer: !!!process.env.CI,
         // Max time to wait for dev server to start before aborting, defaults to 60000 (60 seconds)

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+// @ts-ignore - position of type import changed in Stencil 5
 import type { HostElement } from '@stencil/core/compiler';
 
 /**

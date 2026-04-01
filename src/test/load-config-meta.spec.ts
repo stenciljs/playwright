@@ -1,6 +1,11 @@
-import fs from 'fs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loadConfigMeta } from '../load-config-meta';
+
+const existsSyncMock = vi.fn();
+vi.mock('fs', () => ({
+  existsSync: () => existsSyncMock(),
+}));
 
 const stencilConfig = {
   fsNamespace: 'mock-namespace',
@@ -19,11 +24,12 @@ const stencilConfig = {
   ],
 };
 
-const findUpMock = jest.fn();
-jest.mock('find-up', () => ({
+const findUpMock = vi.fn();
+vi.mock('find-up', () => ({
   findUp: () => findUpMock(),
 }));
-jest.mock('@stencil/core/compiler', () => ({
+
+vi.mock('@stencil/core/compiler', () => ({
   loadConfig: () => ({
     config: stencilConfig,
   }),
@@ -31,11 +37,11 @@ jest.mock('@stencil/core/compiler', () => ({
 
 describe('loadConfigMeta', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return defaults if a config does not exist', async () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -52,7 +58,7 @@ describe('loadConfigMeta', () => {
   });
 
   it('should use the validated Stencil config values', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
+    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -67,9 +73,9 @@ describe('loadConfigMeta', () => {
 
   it('should log a warning if no "www" output target is found', async () => {
     stencilConfig.outputTargets = [];
-    jest.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
+    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const configMeta = await loadConfigMeta();
 
@@ -85,7 +91,7 @@ describe('loadConfigMeta', () => {
   });
 
   it('should log a warning if no Stencil config path was found', async () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const configMeta = await loadConfigMeta();
 
