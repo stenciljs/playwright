@@ -46,7 +46,7 @@
     "npm": ">=6.0.0"
   },
   "volta": {
-    "node": "2022.22.3",
+    "node": "22.22.1",
     "npm": "10.9.7"
   },
   "peerDependencies": {
