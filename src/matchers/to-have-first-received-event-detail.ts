@@ -1,4 +1,3 @@
-import { expect } from '@playwright/test';
 import deepEqual from 'fast-deep-equal';
 
 import { EventSpy } from '../page/event-spy';
@@ -34,8 +33,6 @@ export function toHaveFirstReceivedEventDetail(eventSpy: EventSpy, eventDetail: 
   }
 
   const pass = deepEqual(eventSpy.firstEvent.detail, eventDetail);
-
-  expect(eventSpy.lastEvent.detail).toEqual(eventDetail);
 
   return {
     message: () => `expected event "${eventSpy.eventName}" detail to ${pass ? 'not ' : ''}equal`,

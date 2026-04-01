@@ -4,10 +4,10 @@
     "alwaysStrict": true,
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2015", "dom"],
+    "lib": ["ES2022", "dom"],
     "esModuleInterop": true,
-    "module": "ES2015",
-    "moduleResolution": "Node",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
@@ -16,7 +16,7 @@
     "pretty": true,
     "removeComments": false,
     "strict": true,
-    "target": "es2017"
+    "target": "es2022"
   },
   "files": ["src/index.ts"]
 }

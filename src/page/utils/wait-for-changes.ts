@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
-import type { HostElement } from '@stencil/core/internal';
+// @ts-ignore - position of type import changed in Stencil 5
+import type { HostElement } from '@stencil/core/compiler';
 
 /**
  * Waits for a combined threshold of a Stencil web component to be re-hydrated in the next repaint + 100ms.

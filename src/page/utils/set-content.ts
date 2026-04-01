@@ -21,6 +21,13 @@ export const setContent = async (page: Page, html: string, testInfo: TestInfo, o
   const baseUrl = testInfo.project.use.baseURL;
   const baseEntryPath = process.env.STENCIL_ENTRY_PATH;
 
+  // Extract head and body content from the server-rendered HTML
+  const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+
+  const headContent = headMatch ? headMatch[1] : '';
+  const bodyContent = bodyMatch ? bodyMatch[1] : html;
+
   const output = `
     <!DOCTYPE html>
     <html lang="en">
@@ -28,11 +35,12 @@ export const setContent = async (page: Page, html: string, testInfo: TestInfo, o
         <title>Stencil Playwright Test</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
+        ${headContent}
         <script src="${baseEntryPath}.js" nomodule></script>
         <script type="module" src="${baseEntryPath}.esm.js"></script>
       </head>
       <body>
-        ${html}
+        ${bodyContent}
       </body>
     </html>
   `;

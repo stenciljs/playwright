@@ -1,7 +1,9 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import { createConfig } from '../create-config';
 
 // Mock the loadConfigMeta function to just return the default values
-jest.mock('../load-config-meta', () => ({
+vi.mock('../load-config-meta', () => ({
   loadConfigMeta: () => ({
     baseURL: 'http://localhost:3333',
     webServerUrl: 'http://localhost:3333/ping',
@@ -20,7 +22,8 @@ describe('createConfig', () => {
         baseURL: 'http://localhost:3333',
       },
       webServer: {
-        command: 'stencil build --dev --watch --serve --no-open',
+        command: 'stencil build --dev --watch --serve --no-open --testing',
+        cwd: undefined,
         url: 'http://localhost:3333/ping',
         reuseExistingServer: !process.env.CI,
         timeout: undefined,
@@ -44,7 +47,8 @@ describe('createConfig', () => {
         baseURL: 'http://localhost:3333',
       },
       webServer: {
-        command: 'stencil build --dev --watch --serve --no-open',
+        command: 'stencil build --dev --watch --serve --no-open --testing',
+        cwd: undefined,
         url: 'http://localhost:3333/ping',
         reuseExistingServer: !process.env.CI,
         timeout: undefined,
