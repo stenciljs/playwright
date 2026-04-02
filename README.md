@@ -190,7 +190,7 @@ Will result in:
     baseURL: 'http://localhost:3333',
   },
   webServer: {
-    command: 'stencil build --dev --watch --serve --no-open',
+    command: 'npx stencil build --dev --watch --serve --no-open',
     url: 'http://localhost:3333/ping',
     reuseExistingServer: !process.env.CI,
     // Only timeout gets overridden, not the entire object
