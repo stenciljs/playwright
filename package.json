@@ -1,6 +1,6 @@
 {
   "name": "@stencil/playwright",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Testing adapter to use Playwright with Stencil",
   "type": "module",
   "main": "dist/index.js",
