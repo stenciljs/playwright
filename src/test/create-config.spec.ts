@@ -22,7 +22,7 @@ describe('createConfig', () => {
         baseURL: 'http://localhost:3333',
       },
       webServer: {
-        command: 'stencil build --dev --watch --serve --no-open --testing',
+        command: 'npx stencil build --dev --watch --serve --no-open --testing',
         cwd: undefined,
         url: 'http://localhost:3333/ping',
         reuseExistingServer: !process.env.CI,
@@ -47,7 +47,7 @@ describe('createConfig', () => {
         baseURL: 'http://localhost:3333',
       },
       webServer: {
-        command: 'stencil build --dev --watch --serve --no-open --testing',
+        command: 'npx stencil build --dev --watch --serve --no-open --testing',
         cwd: undefined,
         url: 'http://localhost:3333/ping',
         reuseExistingServer: !process.env.CI,
