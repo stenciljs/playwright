@@ -2,7 +2,7 @@
 import { loadConfig, OutputTargetWww } from '@stencil/core/compiler';
 import { findUp } from 'find-up';
 import { existsSync } from 'fs';
-import { isAbsolute, join, relative } from 'path';
+import { dirname, isAbsolute, join, relative } from 'path';
 
 /**
  * Common shape for output targets with dir and buildDir properties.
@@ -69,11 +69,23 @@ export const loadConfigMeta = async (cwd?: string) => {
       // Get path from dev-server root to target dir
       // If dir is relative, it's already relative to project root (same as devServer.root)
       const targetDir = target.dir!;
-      const relativePath = isAbsolute(targetDir) ? relative(devServer.root!, targetDir) : targetDir;
+
+      // Use stencil config directory as fallback if devServer.root is not usable
+      const configDir = dirname(stencilConfigPath);
+      const rootDir = devServer.root && devServer.root !== '/' ? devServer.root : configDir;
+
+      const relativePath = isAbsolute(targetDir) ? relative(rootDir, targetDir) : targetDir;
 
       // dist/loader-bundle use empty string as default buildDir
+      // Stencil may resolve buildDir to absolute path, so we need to handle that
+      let buildDir = target.buildDir ?? '';
+      if (buildDir && isAbsolute(buildDir)) {
+        // If buildDir is absolute, compute relative path from targetDir
+        // If buildDir equals targetDir, use empty string (no subdirectory)
+        buildDir = buildDir === targetDir ? '' : relative(targetDir, buildDir);
+      }
+
       // Path structure: dir/buildDir/namespace/namespace (extra namespace folder)
-      const buildDir = target.buildDir ?? '';
       const entryPath = join(relativePath, buildDir, fsNamespace, fsNamespace);
       stencilEntryPath = entryPath === '' ? '.' : entryPath.startsWith('.') ? entryPath : `./${entryPath}`;
     } else {
