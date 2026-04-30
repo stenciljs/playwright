@@ -60,10 +60,10 @@ For full documentation, please see the [Playwright testing docs on the official 
    > This will resolve a build error related to `Symbol.asyncDispose`. If this is not added, tests may fail to run since the Stencil dev server will be unable
    > to start due to the build error.
 
-1. Ensure the Stencil project has a [`www` output target](https://stenciljs.com/docs/www). Playwright relies on pre-compiled output running in a dev server
+1. Ensure the Stencil project has a [`www`](https://stenciljs.com/docs/www), `dist`, or `loader-bundle` output target. Playwright relies on pre-compiled output running in a dev server
    to run tests against. When using the `createConfig()` helper, a configuration for the dev server will be automatically created based on
-   the Stencil project's `www` output target config and [dev server config](https://stenciljs.com/docs/dev-server). If no `www` output target is specified,
-   tests will not be able to run.
+   the Stencil project's output target config and [dev server config](https://stenciljs.com/docs/dev-server). The adapter will look for output targets in the following order of priority: `www` > `dist` (Stencil < v5) / `loader-bundle` (Stencil v5). If none of these output targets are specified,
+   tests may not be able to run.
 
 1. Add the `copy` option to the `www` output target config:
 

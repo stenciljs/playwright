@@ -2,7 +2,17 @@
 import { loadConfig, OutputTargetWww } from '@stencil/core/compiler';
 import { findUp } from 'find-up';
 import { existsSync } from 'fs';
-import { relative } from 'path';
+import { join, relative } from 'path';
+
+/**
+ * Common shape for output targets with dir and buildDir properties.
+ * Used for dist (v4) and loader-bundle (v5) targets.
+ */
+interface OutputTargetWithDir {
+  type: string;
+  dir?: string;
+  buildDir?: string;
+}
 
 const DEFAULT_NAMESPACE = 'app';
 const DEFAULT_BASE_URL = 'http://localhost:3333';
@@ -33,24 +43,41 @@ export const loadConfigMeta = async (cwd?: string) => {
   if (stencilConfigPath && existsSync(stencilConfigPath)) {
     const { devServer, fsNamespace, outputTargets } = (await loadConfig({ configPath: stencilConfigPath })).config;
 
-    // Grab the WWW output target. If one doesn't exist, we'll throw a warning and roll
-    // with the default value for the entry path.
+    // Grab a suitable output target for script injection.
+    // Priority: www > dist (v4) > loader-bundle (v5)
     const wwwTarget = outputTargets.find((o): o is OutputTargetWww => o.type === 'www');
+    const distTarget = outputTargets.find((o) => o.type === 'dist') as OutputTargetWithDir | undefined;
+    // loader-bundle is a v5 output target type, so we need to cast to avoid type errors on v4
+    const loaderBundleTarget = outputTargets.find((o) => (o as OutputTargetWithDir).type === 'loader-bundle') as
+      | OutputTargetWithDir
+      | undefined;
+
     if (wwwTarget) {
       // Get path from dev-server root to www
-      let relativePath = relative(devServer.root!, wwwTarget.dir!);
-      relativePath = relativePath === '' ? '.' : relativePath;
-      if (!relativePath.startsWith('.')) {
-        relativePath = `./${relativePath}`;
-      }
+      const relativePath = relative(devServer.root!, wwwTarget.dir!);
 
-      stencilEntryPath = `${relativePath}/build/${fsNamespace}`;
+      // Use buildDir from config (defaults to 'build' for www target)
+      const buildDir = (wwwTarget as unknown as { buildDir?: string }).buildDir ?? 'build';
+      const entryPath = join(relativePath, buildDir, fsNamespace);
+      stencilEntryPath = entryPath === '' ? '.' : entryPath.startsWith('.') ? entryPath : `./${entryPath}`;
+    } else if (distTarget || loaderBundleTarget) {
+      // Fall back to dist or loader-bundle target
+      const target = distTarget ?? loaderBundleTarget!;
+
+      // Get path from dev-server root to target dir
+      const relativePath = relative(devServer.root!, target.dir!);
+
+      // dist/loader-bundle use empty string as default buildDir
+      // Path structure: dir/buildDir/namespace/namespace (extra namespace folder)
+      const buildDir = target.buildDir ?? '';
+      const entryPath = join(relativePath, buildDir, fsNamespace, fsNamespace);
+      stencilEntryPath = entryPath === '' ? '.' : entryPath.startsWith('.') ? entryPath : `./${entryPath}`;
     } else {
       // Make a best guess at the entry path
       stencilEntryPath = `${DEFAULT_STENCIL_ENTRY_PATH_PREFIX}/${fsNamespace}`;
 
       console.warn(
-        `No "www" output target found in the Stencil config. Using default entry path: "${stencilEntryPath}". Tests using 'setContent' may fail to execute.`,
+        `No "www", "dist", or "loader-bundle" output target found in the Stencil config. Using default entry path: "${stencilEntryPath}". Tests using 'setContent' may fail to execute.`,
       );
     }
 
