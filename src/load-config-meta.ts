@@ -52,14 +52,22 @@ export const loadConfigMeta = async (cwd?: string) => {
       | OutputTargetWithDir
       | undefined;
 
+    // Use stencil config directory as fallback if devServer.root is not usable
+    const configDir = dirname(stencilConfigPath);
+    const rootDir = devServer.root && devServer.root !== '/' ? devServer.root : configDir;
+
     if (wwwTarget) {
       // Get path from dev-server root to www
-      // If dir is relative, it's already relative to project root (same as devServer.root)
       const wwwDir = wwwTarget.dir!;
-      const relativePath = isAbsolute(wwwDir) ? relative(devServer.root!, wwwDir) : wwwDir;
+      const relativePath = isAbsolute(wwwDir) ? relative(rootDir, wwwDir) : wwwDir;
 
       // Use buildDir from config (defaults to 'build' for www target)
-      const buildDir = (wwwTarget as unknown as { buildDir?: string }).buildDir ?? 'build';
+      // Stencil may resolve buildDir to absolute path, so we need to handle that
+      let buildDir = (wwwTarget as unknown as { buildDir?: string }).buildDir ?? 'build';
+      if (buildDir && isAbsolute(buildDir)) {
+        buildDir = buildDir === wwwDir ? '' : relative(wwwDir, buildDir);
+      }
+
       const entryPath = join(relativePath, buildDir, fsNamespace);
       stencilEntryPath = entryPath === '' ? '.' : entryPath.startsWith('.') ? entryPath : `./${entryPath}`;
     } else if (distTarget || loaderBundleTarget) {
@@ -67,13 +75,7 @@ export const loadConfigMeta = async (cwd?: string) => {
       const target = distTarget ?? loaderBundleTarget!;
 
       // Get path from dev-server root to target dir
-      // If dir is relative, it's already relative to project root (same as devServer.root)
       const targetDir = target.dir!;
-
-      // Use stencil config directory as fallback if devServer.root is not usable
-      const configDir = dirname(stencilConfigPath);
-      const rootDir = devServer.root && devServer.root !== '/' ? devServer.root : configDir;
-
       const relativePath = isAbsolute(targetDir) ? relative(rootDir, targetDir) : targetDir;
 
       // dist/loader-bundle use empty string as default buildDir
