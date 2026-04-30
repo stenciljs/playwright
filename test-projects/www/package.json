@@ -1,0 +1,8 @@
+{
+  "name": "test-www",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@stencil/core": "^4.0.0"
+  }
+}
