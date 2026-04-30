@@ -7,7 +7,17 @@ vi.mock('fs', () => ({
   existsSync: () => existsSyncMock(),
 }));
 
-const stencilConfig = {
+const stencilConfig: {
+  fsNamespace: string;
+  devServer: {
+    protocol: string;
+    address: string;
+    port: number;
+    pingRoute: string;
+    root: string;
+  };
+  outputTargets: Array<{ type: string; dir: string; buildDir?: string }>;
+} = {
   fsNamespace: 'mock-namespace',
   devServer: {
     protocol: 'http',
@@ -71,7 +81,7 @@ describe('loadConfigMeta', () => {
     });
   });
 
-  it('should log a warning if no "www" output target is found', async () => {
+  it('should log a warning if no supported output target is found', async () => {
     stencilConfig.outputTargets = [];
     existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
@@ -80,11 +90,124 @@ describe('loadConfigMeta', () => {
     const configMeta = await loadConfigMeta();
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      `No "www" output target found in the Stencil config. Using default entry path: "./build/mock-namespace". Tests using 'setContent' may fail to execute.`,
+      `No "www", "dist", or "loader-bundle" output target found in the Stencil config. Using default entry path: "./build/mock-namespace". Tests using 'setContent' may fail to execute.`,
     );
     expect(configMeta).toEqual({
       baseURL: 'http://localhost:4444',
       stencilEntryPath: './build/mock-namespace',
+      stencilNamespace: 'mock-namespace',
+      webServerUrl: 'http://localhost:4444/status',
+    });
+  });
+
+  it('should use www target with custom buildDir', async () => {
+    stencilConfig.outputTargets = [
+      {
+        type: 'www',
+        dir: '/mock-path/www',
+        buildDir: 'custom-build',
+      },
+    ];
+    existsSyncMock.mockReturnValueOnce(true);
+    findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
+
+    const configMeta = await loadConfigMeta();
+
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:4444',
+      stencilEntryPath: './www/custom-build/mock-namespace',
+      stencilNamespace: 'mock-namespace',
+      webServerUrl: 'http://localhost:4444/status',
+    });
+  });
+
+  it('should fall back to dist target when www is not available', async () => {
+    stencilConfig.outputTargets = [
+      {
+        type: 'dist',
+        dir: '/mock-path/dist',
+      },
+    ];
+    existsSyncMock.mockReturnValueOnce(true);
+    findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
+
+    const configMeta = await loadConfigMeta();
+
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:4444',
+      stencilEntryPath: './dist/mock-namespace/mock-namespace',
+      stencilNamespace: 'mock-namespace',
+      webServerUrl: 'http://localhost:4444/status',
+    });
+  });
+
+  it('should fall back to loader-bundle target when www and dist are not available', async () => {
+    stencilConfig.outputTargets = [
+      {
+        type: 'loader-bundle',
+        dir: '/mock-path/dist/loader-bundle',
+      },
+    ];
+    existsSyncMock.mockReturnValueOnce(true);
+    findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
+
+    const configMeta = await loadConfigMeta();
+
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:4444',
+      stencilEntryPath: './dist/loader-bundle/mock-namespace/mock-namespace',
+      stencilNamespace: 'mock-namespace',
+      webServerUrl: 'http://localhost:4444/status',
+    });
+  });
+
+  it('should prefer www target over dist and loader-bundle', async () => {
+    stencilConfig.outputTargets = [
+      {
+        type: 'dist',
+        dir: '/mock-path/dist',
+      },
+      {
+        type: 'www',
+        dir: '/mock-path/www',
+      },
+      {
+        type: 'loader-bundle',
+        dir: '/mock-path/dist/loader-bundle',
+      },
+    ];
+    existsSyncMock.mockReturnValueOnce(true);
+    findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
+
+    const configMeta = await loadConfigMeta();
+
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:4444',
+      stencilEntryPath: './www/build/mock-namespace',
+      stencilNamespace: 'mock-namespace',
+      webServerUrl: 'http://localhost:4444/status',
+    });
+  });
+
+  it('should prefer dist target over loader-bundle', async () => {
+    stencilConfig.outputTargets = [
+      {
+        type: 'loader-bundle',
+        dir: '/mock-path/dist/loader-bundle',
+      },
+      {
+        type: 'dist',
+        dir: '/mock-path/dist',
+      },
+    ];
+    existsSyncMock.mockReturnValueOnce(true);
+    findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
+
+    const configMeta = await loadConfigMeta();
+
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:4444',
+      stencilEntryPath: './dist/mock-namespace/mock-namespace',
       stencilNamespace: 'mock-namespace',
       webServerUrl: 'http://localhost:4444/status',
     });
