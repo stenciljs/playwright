@@ -2,7 +2,7 @@
 import { loadConfig, OutputTargetWww } from '@stencil/core/compiler';
 import { findUp } from 'find-up';
 import { existsSync } from 'fs';
-import { join, relative } from 'path';
+import { isAbsolute, join, relative } from 'path';
 
 /**
  * Common shape for output targets with dir and buildDir properties.
@@ -54,7 +54,9 @@ export const loadConfigMeta = async (cwd?: string) => {
 
     if (wwwTarget) {
       // Get path from dev-server root to www
-      const relativePath = relative(devServer.root!, wwwTarget.dir!);
+      // If dir is relative, it's already relative to project root (same as devServer.root)
+      const wwwDir = wwwTarget.dir!;
+      const relativePath = isAbsolute(wwwDir) ? relative(devServer.root!, wwwDir) : wwwDir;
 
       // Use buildDir from config (defaults to 'build' for www target)
       const buildDir = (wwwTarget as unknown as { buildDir?: string }).buildDir ?? 'build';
@@ -65,7 +67,9 @@ export const loadConfigMeta = async (cwd?: string) => {
       const target = distTarget ?? loaderBundleTarget!;
 
       // Get path from dev-server root to target dir
-      const relativePath = relative(devServer.root!, target.dir!);
+      // If dir is relative, it's already relative to project root (same as devServer.root)
+      const targetDir = target.dir!;
+      const relativePath = isAbsolute(targetDir) ? relative(devServer.root!, targetDir) : targetDir;
 
       // dist/loader-bundle use empty string as default buildDir
       // Path structure: dir/buildDir/namespace/namespace (extra namespace folder)

@@ -213,6 +213,26 @@ describe('loadConfigMeta', () => {
     });
   });
 
+  it('should handle loader-bundle target with relative dir path', async () => {
+    stencilConfig.outputTargets = [
+      {
+        type: 'loader-bundle',
+        dir: 'dist/loader-bundle', // relative path, not absolute
+      },
+    ];
+    existsSyncMock.mockReturnValueOnce(true);
+    findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
+
+    const configMeta = await loadConfigMeta();
+
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:4444',
+      stencilEntryPath: './dist/loader-bundle/mock-namespace/mock-namespace',
+      stencilNamespace: 'mock-namespace',
+      webServerUrl: 'http://localhost:4444/status',
+    });
+  });
+
   it('should log a warning if no Stencil config path was found', async () => {
     const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
