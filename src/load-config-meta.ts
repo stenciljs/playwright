@@ -46,11 +46,11 @@ export const loadConfigMeta = async (cwd?: string) => {
     // Grab a suitable output target for script injection.
     // Priority: www > dist (v4) > loader-bundle (v5)
     const wwwTarget = outputTargets.find((o): o is OutputTargetWww => o.type === 'www');
-    const distTarget = outputTargets.find((o) => o.type === 'dist') as OutputTargetWithDir | undefined;
+    const distTarget = outputTargets.find((o) => (o as OutputTargetWithDir).type === 'dist') as
+      OutputTargetWithDir | undefined;
     // loader-bundle is a v5 output target type, so we need to cast to avoid type errors on v4
     const loaderBundleTarget = outputTargets.find((o) => (o as OutputTargetWithDir).type === 'loader-bundle') as
-      | OutputTargetWithDir
-      | undefined;
+      OutputTargetWithDir | undefined;
 
     // Use stencil config directory as fallback if devServer.root is not usable
     const configDir = dirname(stencilConfigPath);

@@ -18,13 +18,13 @@ jobs:
         uses: ./.github/workflows/actions/get-core-dependencies
 
       - name: 📝 ESLint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: 📝 Prettier Check
-        run: npm run format.dry-run
+        run: pnpm run format.dry-run
         shell: bash
 
       - name: 📝 Spellcheck
-        run: npm run spellcheck
+        run: pnpm run spellcheck
         shell: bash
 

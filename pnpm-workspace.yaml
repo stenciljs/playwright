@@ -1,0 +1,6 @@
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+minimumReleaseAgeExclude:
+  - eslint-plugin-jsdoc@63.0.13
+  - eslint@10.7.0

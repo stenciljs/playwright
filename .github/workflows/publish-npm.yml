@@ -15,7 +15,7 @@ on:
         description: 'Node.js version to use when publishing.'
         required: false
         type: string
-        default: '20'
+        default: '24'
       registry-url:
         description: 'Registry URL used for npm publish.'
         required: false
@@ -74,7 +74,7 @@ jobs:
         # have been bumped by running the Production PR Creation workflow first.
         #
         # TODO(STENCIL-1221): Push git tags to GitHub, only on Prod releases
-        run: npm version --no-git-tag-version ${{ inputs.version }} --allow-same-version
+        run: pnpm version --no-git-tag-version ${{ inputs.version }} --allow-same-version
         shell: bash
 
       - name: 🔎 Get Version from package.json
@@ -104,7 +104,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
+          git add package.json pnpm-lock.yaml
           # Only commit if there are changes
           if ! git diff --staged --quiet; then
             git commit -m "chore: bump version to ${{ steps.get-version.outputs.VERSION }}"
@@ -150,11 +150,10 @@ jobs:
           fi
         shell: bash
 
-      - name: 🔄 Ensure Latest npm
-        run: npm install -g npm@latest
-        shell: bash
-
       - name: 🚀 Publish to NPM
-        run: npm publish --tag ${{ inputs.tag }} --provenance
+        # --no-git-checks: pnpm defaults to requiring the current branch to be named "master" and
+        # up to date with its remote before publishing. This repo's default branch is "main", and the
+        # commit/tag/push steps above already guarantee a clean, pushed working tree, so the check is redundant.
+        run: pnpm publish --tag ${{ inputs.tag }} --provenance --no-git-checks
         shell: bash
 

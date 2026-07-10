@@ -14,9 +14,12 @@
     "noUnusedParameters": true,
     "outDir": "dist",
     "pretty": true,
+    "rootDir": "src",
     "removeComments": false,
+    "skipLibCheck": true,
     "strict": true,
-    "target": "es2022"
+    "target": "es2022",
+    "types": ["node"]
   },
   "files": ["src/index.ts"]
 }

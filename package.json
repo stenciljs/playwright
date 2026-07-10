@@ -16,13 +16,13 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run build.empty && npm run build.types && npm run build.bundle",
+    "build": "pnpm run build.empty && pnpm run build.types && pnpm run build.bundle",
     "build.empty": "rimraf ./dist ./build/build.js",
     "build.types": "tsc --emitDeclarationOnly --outDir ./dist",
     "build.bundle": "tsx ./build/build.ts",
-    "format": "npm run format.base -- --write",
+    "format": "pnpm run format.base --write",
     "format.base": "prettier --cache \"src/**/*.ts\"",
-    "format.dry-run": "npm run format.base -- --list-different",
+    "format.dry-run": "pnpm run format.base --list-different",
     "lint": "eslint \"src/**/*.ts\"",
     "spellcheck": "cspell --no-progress \"src/**/*.ts\" \"build/**/*.ts\" \"*.md\"",
     "test": "vitest run"
@@ -43,45 +43,44 @@
   },
   "homepage": "https://github.com/stenciljs/playwright#readme",
   "engines": {
-    "node": ">=12.0.0",
-    "npm": ">=6.0.0"
+    "node": ">=22.0.0"
   },
+  "packageManager": "pnpm@11.11.0",
   "volta": {
-    "node": "22.22.1",
-    "npm": "10.9.7"
+    "node": "24.18.0"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.50.0",
     "@stencil/core": "^4.0.0 || >=5.0.0-alpha.0 <5.0.0-beta.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^10.0.1",
     "@ionic/prettier-config": "^4.0.0",
-    "@playwright/test": "^1.50.0",
+    "@playwright/test": "^1.61.1",
     "@stencil/core": ">=5.0.0-alpha.0 <5.0.0-beta.0",
     "@types/eslint": "^9.6.1",
-    "@types/node": "^24.9.2",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
-    "cspell": "^9.2.2",
-    "esbuild": "^0.25.11",
-    "eslint": "^9.38.0",
+    "@types/node": "^24.13.3",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
+    "cspell": "^10.0.1",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-jsdoc": "^61.1.11",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "eslint-plugin-unused-imports": "^4.3.0",
-    "globals": "^14.0.0",
-    "vitest": "^3.2.4",
-    "prettier": "^3.6.2",
-    "rimraf": "^6.0.1",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.2"
+    "eslint-plugin-jsdoc": "^63.0.13",
+    "eslint-plugin-simple-import-sort": "^13.0.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.7.0",
+    "vitest": "^4.1.10",
+    "prettier": "^3.9.5",
+    "rimraf": "^6.1.3",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.63.0"
   },
   "prettier": "@ionic/prettier-config",
   "dependencies": {
     "deepmerge": "^4.3.1",
+    "fast-deep-equal": "^3.1.3",
     "find-up": "^8.0.0"
   }
 }

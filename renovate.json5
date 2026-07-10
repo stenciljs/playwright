@@ -31,19 +31,6 @@
    * support for a package that could be removed from the registry.
    */
   minimumReleaseAge: '3 days',
-  /**
-   * Note: Renovate will evaluate all packageRules and not stop once it gets a first match.
-   */
-  packageRules: [
-    {
-      matchPackageNames: ['@types/node'],
-      allowedVersions: '<21.0.0',
-    },
-    {
-      matchPackageNames: ['@types/jest', 'jest', 'ts-jest'],
-      groupName: 'Jest',
-    },
-  ],
   // Never rebase the branch or update it unless manually requested to avoid noisy PR emails
   rebaseWhen: 'never',
   // Note: Timezone for the schedule is specified as UTC
