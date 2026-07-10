@@ -45,53 +45,54 @@ Please see our [Contributor Code of Conduct](https://github.com/ionic-team/stenc
 1. Fork the repo.
 2. Clone your fork.
 3. Make a branch for your change.
-4. Stencil Playwright uses [volta](https://volta.sh) to manage its npm and Node versions.
-   [Install it](https://docs.volta.sh/guide/getting-started) before proceeding.
-   1. There's no need to install a specific version of npm or Node right now, it shall be done automatically for you in
-      the next step
-5. Run `npm ci`
+4. Stencil Playwright uses [volta](https://volta.sh) to manage its Node version, and [pnpm](https://pnpm.io) as
+   its package manager. [Install volta](https://docs.volta.sh/guide/getting-started) before proceeding.
+   1. There's no need to install a specific version of Node right now, it shall be done automatically for you in
+      the next step. pnpm itself is resolved automatically via [Corepack](https://nodejs.org/api/corepack.html)
+      from the `packageManager` field in `package.json` (run `corepack enable` once if you haven't already).
+5. Run `pnpm install`
 
 ### Updates
 
 1. Unit test. Unit test. Unit test. Please take a look at how other unit tests are written, and you can't write too many tests.
 2. If there is a `*.spec.ts` file located in the `test/` folder, update it to include a test for your change, if needed. If this file doesn't exist, please notify us.
-3. First run `npm run build`. Then run `npm run test` or `npm run test.watch` to make sure all tests are working, regardless if a test was added.
+3. First run `pnpm run build`. Then run `pnpm run test` to make sure all tests are working, regardless if a test was added.
 
 ### Testing Changes Against a Project Locally
 
-#### Testing with `npm link`:
+#### Testing with `pnpm link`:
 
-Using `npm link` is beneficial to the development cycle in that consecutive builds of Stencil Playwright are immediately available in your project, without any additional `npm install` steps needed:
+Using `pnpm link` is beneficial to the development cycle in that consecutive builds of Stencil Playwright are immediately available in your project, without any additional install steps needed:
 
 1. In the directory of _Stencil Playwright_:
-   1. Run `npm run build`
-   2. Run `npm link`
+   1. Run `pnpm run build`
+   2. Run `pnpm link --global`
 2. In the directory of _your stencil project_:
-   1. Run `npm link @stencil/playwright`
+   1. Run `pnpm link --global @stencil/playwright`
 
 You can then test your changes against your own Stencil project.
 
 Afterwards, to clean up:
 
 1. In the directory of _your stencil project_:
-   1. Run `npm unlink @stencil/playwright`
-2. In the directory of _Stencil Playwright_, run `npm unlink`
+   1. Run `pnpm unlink @stencil/playwright`
+2. In the directory of _Stencil Playwright_, run `pnpm unlink --global`
 
-#### Testing with `npm pack`:
+#### Testing with `pnpm pack`:
 
-There are some cases where `npm link` may fall short. For instance, when upgrading a minimum/recommended package version where the package in question has changed its typings. Rather than updating `paths` in your project's `tsconfig.json` file, it may be easier to create a tarball of the project and install in manually.
+There are some cases where `pnpm link` may fall short. For instance, when upgrading a minimum/recommended package version where the package in question has changed its typings. Rather than updating `paths` in your project's `tsconfig.json` file, it may be easier to create a tarball of the project and install in manually.
 
 1. In the directory of _Stencil Playwright_:
-   1. Run `npm run build`
-   2. Run `npm pack`. This will create a tarball with the name `stencil-playwright-<VERSION>.tgz`
+   1. Run `pnpm run build`
+   2. Run `pnpm pack`. This will create a tarball with the name `stencil-playwright-<VERSION>.tgz`
 2. In the directory of _your stencil project_:
-   1. Run `npm install --save-dev <PATH_TO_STENCIL_PLAYWRIGHT_REPO_ON_DISK>/stencil-playwright-<VERSION>.tgz`.
+   1. Run `pnpm add --save-dev <PATH_TO_STENCIL_PLAYWRIGHT_REPO_ON_DISK>/stencil-playwright-<VERSION>.tgz`.
 
-Note that this method of testing is far more laborious than using `npm link`, and requires every step to be repeated following a change to the Stencil core source.
+Note that this method of testing is far more laborious than using `pnpm link`, and requires every step to be repeated following a change to the Stencil core source.
 
 Afterwards, to clean up:
 
-1. In the directory of your Stencil project, run `npm install --save-dev @stencil/playwright@<VERSION>` for the `<VERSION>` of Stencil core that was installed in your project prior to testing.
+1. In the directory of your Stencil project, run `pnpm add --save-dev @stencil/playwright@<VERSION>` for the `<VERSION>` of Stencil core that was installed in your project prior to testing.
 
 ### Commit Message Format
 

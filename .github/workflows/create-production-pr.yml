@@ -34,7 +34,7 @@ jobs:
         uses: ./.github/workflows/actions/get-core-dependencies
 
       - name: 🏷️ Bump the Version
-        run: npm version ${{ inputs.version }} --no-git-tag
+        run: pnpm version ${{ inputs.version }} --no-git-tag-version
 
       - name: 📝 Log Generated Changes
         run: git --no-pager diff

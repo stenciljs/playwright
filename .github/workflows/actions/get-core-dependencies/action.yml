@@ -3,6 +3,9 @@ description: 'sets the node version & initializes core dependencies'
 runs:
   using: composite
   steps:
+    - name: 🟢 Use pnpm Version from package.json
+      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
     # this overrides previous versions of the node runtime that was set.
     # jobs that need a different version of the Node runtime should explicitly
     # set their node version after running this step
@@ -10,8 +13,8 @@ runs:
       uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       with:
         node-version-file: './package.json'
-        cache: 'npm'
+        cache: 'pnpm'
 
     - name: 📦 Install Dependencies
-      run: npm ci
+      run: pnpm install --frozen-lockfile
       shell: bash

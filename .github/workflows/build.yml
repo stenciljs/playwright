@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/workflows/actions/get-core-dependencies
 
       - name: 🏗️ Stencil Playwright Build
-        run: npm run build
+        run: pnpm run build
         shell: bash
 
       - name: 📤 Upload Build Artifacts
