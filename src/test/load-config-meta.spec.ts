@@ -2,12 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loadConfigMeta } from '../load-config-meta';
 
-const existsSyncMock = vi.fn();
-vi.mock('fs', () => ({
-  existsSync: () => existsSyncMock(),
-}));
-
 const stencilConfig: {
+  rootDir: string;
   fsNamespace: string;
   devServer: {
     protocol: string;
@@ -18,6 +14,7 @@ const stencilConfig: {
   };
   outputTargets: Array<{ type: string; dir: string; buildDir?: string }>;
 } = {
+  rootDir: '/mock-path',
   fsNamespace: 'mock-namespace',
   devServer: {
     protocol: 'http',
@@ -39,25 +36,30 @@ vi.mock('find-up', () => ({
   findUp: () => findUpMock(),
 }));
 
+const loadConfigMock = vi.fn();
 vi.mock('@stencil/core/compiler', () => ({
-  loadConfig: () => ({
-    config: stencilConfig,
-  }),
+  loadConfig: (...args: unknown[]) => loadConfigMock(...args),
 }));
 
 describe('loadConfigMeta', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    // Most tests just want a successfully-resolved config - override per-test for failure cases.
+    loadConfigMock.mockResolvedValue({ config: stencilConfig, diagnostics: [] });
   });
 
-  it('should return defaults if a config does not exist', async () => {
+  it('should fall back to defaults when the resolved config has an error diagnostic', async () => {
     const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
+    loadConfigMock.mockResolvedValueOnce({
+      config: null,
+      diagnostics: [{ level: 'error', messageText: 'boom' }],
+    });
 
     const configMeta = await loadConfigMeta();
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      "Unable to find your project's Stencil configuration file, starting from '/mock-path/stencil.config.ts'. Falling back to defaults.",
+      "Unable to load your project's Stencil configuration file at '/mock-path/stencil.config.ts'. Falling back to defaults.",
     );
     expect(configMeta).toEqual({
       baseURL: 'http://localhost:3333',
@@ -68,7 +70,6 @@ describe('loadConfigMeta', () => {
   });
 
   it('should use the validated Stencil config values', async () => {
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -81,9 +82,41 @@ describe('loadConfigMeta', () => {
     });
   });
 
+  it('should resolve "zero-config" (v5) defaults when no stencil.config.ts/.js is found', async () => {
+    // No config file on disk - findUp comes back empty, but loadConfig() still resolves
+    // (namespace from package.json, default "loader-bundle" output target, etc).
+    findUpMock.mockResolvedValueOnce(undefined);
+
+    const configMeta = await loadConfigMeta();
+
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:4444',
+      stencilEntryPath: './www/build/mock-namespace',
+      stencilNamespace: 'mock-namespace',
+      webServerUrl: 'http://localhost:4444/status',
+    });
+  });
+
+  it('should log a warning if no Stencil configuration could be resolved at all', async () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    findUpMock.mockResolvedValueOnce(undefined);
+    loadConfigMock.mockResolvedValueOnce({ config: null, diagnostics: [] });
+
+    const configMeta = await loadConfigMeta();
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      'Unable to resolve a Stencil configuration for this project. Falling back to defaults.',
+    );
+    expect(configMeta).toEqual({
+      baseURL: 'http://localhost:3333',
+      stencilEntryPath: './build/app',
+      stencilNamespace: 'app',
+      webServerUrl: 'http://localhost:3333/ping',
+    });
+  });
+
   it('should log a warning if no supported output target is found', async () => {
     stencilConfig.outputTargets = [];
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
     const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -108,7 +141,6 @@ describe('loadConfigMeta', () => {
         buildDir: 'custom-build',
       },
     ];
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -128,7 +160,6 @@ describe('loadConfigMeta', () => {
         dir: '/mock-path/dist',
       },
     ];
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -148,7 +179,6 @@ describe('loadConfigMeta', () => {
         dir: '/mock-path/dist/loader-bundle',
       },
     ];
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -176,7 +206,6 @@ describe('loadConfigMeta', () => {
         dir: '/mock-path/dist/loader-bundle',
       },
     ];
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -200,7 +229,6 @@ describe('loadConfigMeta', () => {
         dir: '/mock-path/dist',
       },
     ];
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -220,7 +248,6 @@ describe('loadConfigMeta', () => {
         dir: 'dist/loader-bundle', // relative path, not absolute
       },
     ];
-    existsSyncMock.mockReturnValueOnce(true);
     findUpMock.mockResolvedValueOnce('/mock-path/stencil.config.ts');
 
     const configMeta = await loadConfigMeta();
@@ -230,22 +257,6 @@ describe('loadConfigMeta', () => {
       stencilEntryPath: './dist/loader-bundle/mock-namespace/mock-namespace',
       stencilNamespace: 'mock-namespace',
       webServerUrl: 'http://localhost:4444/status',
-    });
-  });
-
-  it('should log a warning if no Stencil config path was found', async () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-    const configMeta = await loadConfigMeta();
-
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      `No Stencil config file was found matching the glob 'stencil.config.{ts,js}' in the current or parent directories. Falling back to defaults.`,
-    );
-    expect(configMeta).toEqual({
-      baseURL: 'http://localhost:3333',
-      stencilEntryPath: './build/app',
-      stencilNamespace: 'app',
-      webServerUrl: 'http://localhost:3333/ping',
     });
   });
 });

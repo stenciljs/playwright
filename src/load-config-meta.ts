@@ -1,8 +1,7 @@
 // @ts-ignore - position of type import changed in Stencil 5
 import { loadConfig, OutputTargetWww } from '@stencil/core/compiler';
 import { findUp } from 'find-up';
-import { existsSync } from 'fs';
-import { dirname, isAbsolute, join, relative } from 'path';
+import { isAbsolute, join, relative } from 'path';
 
 /**
  * Common shape for output targets with dir and buildDir properties.
@@ -39,9 +38,13 @@ export const loadConfigMeta = async (cwd?: string) => {
   // This allows for the Playwright config to exist in a different directory than the Stencil config.
   const stencilConfigPath = await findUp(['stencil.config.ts', 'stencil.config.js'], { cwd });
 
-  // Only load the Stencil config if the user has created one
-  if (stencilConfigPath && existsSync(stencilConfigPath)) {
-    const { devServer, fsNamespace, outputTargets } = (await loadConfig({ configPath: stencilConfigPath })).config;
+  // Always attempt to load a config, even if no stencil.config.ts/.js was found - a v5 "zero-config"
+  // project has neither, and Stencil's own loadConfig() already knows how to resolve sensible
+  // defaults for that case (namespace from package.json, "loader-bundle" output target, etc).
+  const results = await loadConfig({ configPath: stencilConfigPath ?? undefined });
+
+  if (results.config && !results.diagnostics.some((d) => d.level === 'error')) {
+    const { devServer, fsNamespace, outputTargets, rootDir: resolvedRootDir } = results.config;
 
     // Grab a suitable output target for script injection.
     // Priority: www > dist (v4) > loader-bundle (v5)
@@ -52,9 +55,8 @@ export const loadConfigMeta = async (cwd?: string) => {
     const loaderBundleTarget = outputTargets.find((o) => (o as OutputTargetWithDir).type === 'loader-bundle') as
       OutputTargetWithDir | undefined;
 
-    // Use stencil config directory as fallback if devServer.root is not usable
-    const configDir = dirname(stencilConfigPath);
-    const rootDir = devServer.root && devServer.root !== '/' ? devServer.root : configDir;
+    // Use the resolved project rootDir as fallback if devServer.root is not usable
+    const rootDir = devServer.root && devServer.root !== '/' ? devServer.root : resolvedRootDir;
 
     if (wwwTarget) {
       // Get path from dev-server root to www
@@ -104,8 +106,8 @@ export const loadConfigMeta = async (cwd?: string) => {
     stencilNamespace = fsNamespace;
   } else {
     const msg = stencilConfigPath
-      ? `Unable to find your project's Stencil configuration file, starting from '${stencilConfigPath}'. Falling back to defaults.`
-      : `No Stencil config file was found matching the glob 'stencil.config.{ts,js}' in the current or parent directories. Falling back to defaults.`;
+      ? `Unable to load your project's Stencil configuration file at '${stencilConfigPath}'. Falling back to defaults.`
+      : `Unable to resolve a Stencil configuration for this project. Falling back to defaults.`;
 
     console.warn(msg);
   }
