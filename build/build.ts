@@ -15,7 +15,14 @@ async function build() {
       ...baseOptions,
       outfile: 'dist/index.js',
       format: 'esm',
-    })
+    }),
+    esbuild.build({
+      ...baseOptions,
+      entryPoints: ['src/wizard.ts'],
+      external: [...baseOptions.external!, '@stencil/cli'],
+      outfile: 'dist/wizard.js',
+      format: 'esm',
+    }),
   ]);
 }
 
