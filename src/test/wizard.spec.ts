@@ -16,11 +16,7 @@ function makeSpinner() {
   return { start: vi.fn(), stop: vi.fn() };
 }
 
-function makeInitCtx(
-  rootDir: string,
-  outputTargets: Array<{ type: string; copy?: Array<{ src?: string }> }> = [],
-  isNewProject = false,
-) {
+function makeInitCtx(rootDir: string, outputTargets: Array<{ type: string }> = [], isNewProject = false) {
   return {
     config: { rootDir, fsNamespace: 'my-lib', outputTargets },
     isNewProject,
@@ -85,7 +81,7 @@ describe('wizard.init.run', () => {
   it('proceeds and overwrites when user accepts overwrite', async () => {
     writeFileSync(join(tmpDir, 'playwright.config.ts'), 'export default {};\n');
 
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
     ctx.prompts.confirm.mockResolvedValueOnce(true); // accept overwrite
 
     await wizard.init!.run(ctx as any);
@@ -96,7 +92,7 @@ describe('wizard.init.run', () => {
   });
 
   it('installs @playwright/test as a dev dependency', async () => {
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -104,7 +100,7 @@ describe('wizard.init.run', () => {
   });
 
   it('writes playwright.config.ts with the expected boilerplate', async () => {
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -119,7 +115,7 @@ describe('wizard.init.run', () => {
       join(tmpDir, 'tsconfig.json'),
       JSON.stringify({ compilerOptions: { lib: ['ES2022', 'DOM'] } }, null, 2) + '\n',
     );
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -132,7 +128,7 @@ describe('wizard.init.run', () => {
       join(tmpDir, 'tsconfig.json'),
       JSON.stringify({ compilerOptions: { lib: ['ES2022', 'ESNext.Disposable'] } }, null, 2) + '\n',
     );
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -141,7 +137,7 @@ describe('wizard.init.run', () => {
   });
 
   it('skips tsconfig editing when no tsconfig.json exists', async () => {
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -185,16 +181,8 @@ describe('wizard.init.run', () => {
     );
   });
 
-  it('warns about a missing copy config on an existing www target', async () => {
+  it('does not warn when a "www" output target is already configured', async () => {
     const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
-
-    await wizard.init!.run(ctx as any);
-
-    expect(ctx.prompts.log.warn).toHaveBeenCalledWith(expect.stringContaining('no "copy" config'));
-  });
-
-  it('does not warn when the www target already has a suitable copy config', async () => {
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -206,7 +194,7 @@ describe('wizard.init.run', () => {
       join(tmpDir, 'package.json'),
       JSON.stringify({ name: 'test-lib', scripts: { test: 'my-custom-test' } }, null, 2) + '\n',
     );
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -216,7 +204,7 @@ describe('wizard.init.run', () => {
   });
 
   it('does not add a bare "test" script', async () => {
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }]);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }]);
 
     await wizard.init!.run(ctx as any);
 
@@ -236,7 +224,7 @@ export class MyButton { render() { return <button />; } }
 `,
     );
 
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }], true);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }], true);
 
     await wizard.init!.run(ctx as any);
 
@@ -257,7 +245,7 @@ export class MyButton { render() { return <button />; } }
 `,
     );
 
-    const ctx = makeInitCtx(tmpDir, [{ type: 'www', copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }], false);
+    const ctx = makeInitCtx(tmpDir, [{ type: 'www' }], false);
 
     await wizard.init!.run(ctx as any);
 
