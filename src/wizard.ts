@@ -3,11 +3,6 @@ import { join } from 'node:path';
 
 import type { ProjectConfig, StencilWizardPlugin, WizardContext } from '@stencil/cli';
 
-interface OutputTargetWithCopy {
-  type: string;
-  copy?: ReadonlyArray<{ src?: string }>;
-}
-
 async function fileExists(path: string): Promise<boolean> {
   try {
     await access(path);
@@ -18,25 +13,15 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 /**
- * Looks for a "www" or "loader-bundle" output target.
+ * Checks for a "www" or "loader-bundle" output target.
  * @param config The resolved Stencil project config.
- * @returns The matching "www" and/or "loader-bundle" output targets, if present.
+ * @returns Whether a "www" and/or "loader-bundle" output target is present.
  */
 function detectOutputTargets(config: ProjectConfig) {
-  const outputs = config.outputTargets as ReadonlyArray<OutputTargetWithCopy>;
-  const www = outputs.find((o) => o.type === 'www');
-  const loaderBundle = outputs.find((o) => o.type === 'loader-bundle');
+  const outputs = config.outputTargets as ReadonlyArray<{ type: string }>;
+  const www = outputs.some((o) => o.type === 'www');
+  const loaderBundle = outputs.some((o) => o.type === 'loader-bundle');
   return { www, loaderBundle };
-}
-
-/**
- * Checks a "www" output target's `copy` config for HTML/CSS globs, needed for the `page.goto()` pattern.
- * @param www The "www" output target to check.
- * @returns `true` if the target's `copy` config includes both an HTML and a CSS glob.
- */
-function hasHtmlCssCopy(www: OutputTargetWithCopy): boolean {
-  const copy = www.copy ?? [];
-  return copy.some((c) => c.src?.endsWith('.html')) && copy.some((c) => c.src?.endsWith('.css'));
 }
 
 const PLAYWRIGHT_CONFIG_TEMPLATE = `import { expect } from '@playwright/test';
@@ -96,17 +81,7 @@ async function ensureOutputTarget(context: WizardContext): Promise<void> {
   const { config, prompts } = context;
   const { www, loaderBundle } = detectOutputTargets(config);
 
-  if (www) {
-    if (!hasHtmlCssCopy(www)) {
-      prompts.log.warn(
-        'The "www" output target has no "copy" config for HTML/CSS files.\n' +
-          "Add copy: [{ src: '**/*.html' }, { src: '**/*.css' }] to use the page.goto() testing pattern.",
-      );
-    }
-    return;
-  }
-
-  if (loaderBundle) return;
+  if (www || loaderBundle) return;
 
   const stencilConfigPath = join(config.rootDir, 'stencil.config.ts');
   if (!(await fileExists(stencilConfigPath))) {
@@ -121,7 +96,7 @@ async function ensureOutputTarget(context: WizardContext): Promise<void> {
   });
   if (!prompts.isCancel(addWww) && addWww) {
     const editor = await context.openStencilConfig();
-    editor.addOutputTarget("{ type: 'www', serviceWorker: null, copy: [{ src: '**/*.html' }, { src: '**/*.css' }] }");
+    editor.addOutputTarget("{ type: 'www', serviceWorker: null }");
     await editor.save();
     return;
   }
