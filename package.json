@@ -58,14 +58,14 @@
   },
   "peerDependencies": {
     "@playwright/test": ">=1.50.0",
-    "@stencil/core": "^4.0.0 || ^5.0.0 || >=5.0.0-alpha.19 <5.0.0-next.0"
+    "@stencil/core": "^4.0.0 || ^5.0.0-alpha.19"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@ionic/prettier-config": "^4.0.0",
     "@playwright/test": "^1.61.1",
-    "@stencil/cli": "^5.0.0 || >=5.0.0-alpha.19 <5.0.0-next.0",
-    "@stencil/core": "^5.0.0 || >=5.0.0-alpha.19 <5.0.0-next.0",
+    "@stencil/cli": "^5.0.0-alpha.19",
+    "@stencil/core": "^5.0.0-alpha.19",
     "@types/eslint": "^9.6.1",
     "@types/node": "^24.13.3",
     "@typescript-eslint/eslint-plugin": "^8.63.0",
